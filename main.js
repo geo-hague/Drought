@@ -210,19 +210,48 @@ document.getElementById('date-range').innerText =
 
 const slider = document.getElementById('slider');
 slider.max = droughtDates.length - 1;
-slider.value = 0; // start on latest date (rightmost)
+slider.value = 0; 
 
-// Reverse slider direction with debounce: only load when slider stops moving for 300ms
+// 1. YOUR EXISTING DEBOUNCE LOGIC
 const debouncedLoad = debounce(() => {
   const reversedIndex = droughtDates.length - 1 - slider.value;
   loadDroughtGeoJSON(droughtDates[reversedIndex]);
   updateDatePickerFromDate(droughtDates[reversedIndex]);
+  
+  // Update button states whenever the slider moves
+  updateButtonStates();
 }, 300);
 
 slider.addEventListener('input', debouncedLoad);
 
-// Initial load: show latest available date (right side)
+// 2. NEW BUTTON LOGIC (Insert here)
+const prevBtn = document.getElementById('prev-week');
+const nextBtn = document.getElementById('next-week');
+
+function updateButtonStates() {
+  prevBtn.disabled = (parseInt(slider.value) >= parseInt(slider.max));
+  nextBtn.disabled = (parseInt(slider.value) <= 0);
+}
+
+prevBtn.addEventListener('click', () => {
+  let newValue = parseInt(slider.value) + 1;
+  if (newValue <= slider.max) {
+    slider.value = newValue;
+    debouncedLoad();
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  let newValue = parseInt(slider.value) - 1;
+  if (newValue >= 0) {
+    slider.value = newValue;
+    debouncedLoad();
+  }
+});
+
+// 3. INITIAL LOAD CALLS
 loadDroughtGeoJSON(latestAvailableDateStr);
+updateButtonStates();
 
 // --- Date picker implementation ---
 
