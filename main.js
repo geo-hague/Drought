@@ -148,13 +148,22 @@ const debouncedLoad = debounce(() => {
 slider.addEventListener('input', debouncedLoad);
 
 prevBtn.addEventListener('click', () => {
-  slider.value = parseInt(slider.value) + 1;
-  debouncedLoad();
+  let currentValue = parseInt(slider.value);
+  let maxValue = parseInt(slider.max);
+  
+  if (currentValue < maxValue) {
+    slider.value = currentValue + 1;
+    debouncedLoad(); 
+  }
 });
 
 nextBtn.addEventListener('click', () => {
-  slider.value = parseInt(slider.value) - 1;
-  debouncedLoad();
+  let currentValue = parseInt(slider.value);
+  
+  if (currentValue > 0) {
+    slider.value = currentValue - 1;
+    debouncedLoad();
+  }
 });
 
 // --- Date Picker Logic ---
