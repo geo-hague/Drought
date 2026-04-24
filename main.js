@@ -135,9 +135,16 @@ function loadDroughtGeoJSON(date) {
           const dm = feature.properties.DM;
           const code = 'D' + dm;
           const desc = getDroughtCategoryText(dm);
+          
+          // RE-ADDED HOVER LABEL (TOOLTIP)
+          layer.bindTooltip(`<strong>${code}</strong>: ${desc}`, {
+            sticky: true,
+            direction: 'auto',
+            opacity: 0.9
+          });
+
           layer.bindPopup(`<strong>${code}</strong> (${desc})`);
 
-          // Hover listeners restored
           layer.on({
             mouseover: (e) => {
               const l = e.target;
