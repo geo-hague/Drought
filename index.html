@@ -13,7 +13,7 @@
       font-family: Arial, sans-serif;
       background-color: #f9f9f9;
       color: #333;
-      overflow: hidden; /* Prevent scrolling */
+      overflow: hidden;
     }
 
     #map {
@@ -67,27 +67,45 @@
       color: #2c3e50;
     }
 
+    /* Slider Row Styling */
+    .slider-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 10px 0;
+    }
+
+    .step-btn {
+      background-color: #337ab7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+      line-height: 1;
+    }
+
+    .step-btn:hover {
+      background-color: #1a5276;
+    }
+
+    .step-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
     #slider {
-      width: 100%;
+      flex: 1;
       height: 6px;
       background: #ddd;
       border-radius: 3px;
-      margin: 10px 0;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
-    }
-
-    #slider::-webkit-slider-runnable-track {
-      height: 6px;
-      background: #ddd;
-      border-radius: 3px;
-    }
-
-    #slider::-moz-range-track {
-      height: 6px;
-      background: #ddd;
-      border-radius: 3px;
+      direction: rtl;
     }
 
     #slider::-webkit-slider-thumb {
@@ -98,33 +116,8 @@
       background: #337ab7;
       border-radius: 50%;
       cursor: pointer;
-      margin-top: -7px;
       border: 2px solid #fff;
       box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-      transition: background 0.3s ease;
-    }
-
-    #slider:hover::-webkit-slider-thumb {
-      background: #1a5276;
-    }
-
-    #slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: #337ab7;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #fff;
-      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-      transition: background 0.3s ease;
-    }
-
-    #slider:hover::-moz-range-thumb {
-      background: #1a5276;
-    }
-
-    #slider::-moz-range-progress {
-      background: transparent;
     }
 
     #date-display {
@@ -134,7 +127,7 @@
     }
 
     #date-range {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: #444;
       margin-top: 3px;
     }
@@ -148,21 +141,12 @@
       gap: 10px;
     }
 
-    #right-placeholder label {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
     #right-placeholder select {
       width: 100%;
       padding: 4px 6px;
       font-size: 1rem;
       border-radius: 4px;
       border: 1px solid #ccc;
-    }
-
-    #slider {
-      direction: rtl;
     }
 
     #slider-labels {
@@ -173,27 +157,6 @@
       margin-top: 5px;
       padding: 0 2px;
     }
-
-  .step-btn {
-    background-color: #337ab7;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.2s;
-  }
-  
-  .step-btn:hover {
-    background-color: #1a5276;
-  }
-  
-  .step-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-
   </style>
 </head>
 <body>
@@ -203,11 +166,11 @@
     <div id="legend"></div>
 
     <div id="slider-container">
-      <label for="slider">Select Date:</label><br />
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button id="prev-week" class="step-btn">◀</button>
+      <label for="slider">Select Date:</label>
+      <div class="slider-controls">
+        <button id="prev-week" class="step-btn" title="Previous Week">◀</button>
         <input type="range" id="slider" min="0" max="0" value="0" />
-        <button id="next-week" class="step-btn">▶</button>
+        <button id="next-week" class="step-btn" title="Next Week">▶</button>
       </div>
       <div id="date-display"></div>
       <div id="date-range"></div>
@@ -216,6 +179,9 @@
         <span id="slider-label-right"></span>
       </div>
     </div>
+
+    <div id="right-placeholder"></div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="main.js"></script>
