@@ -1,12 +1,7 @@
 // --- Global State & Config ---
-// This holds our shared opacity value so it persists across date changes
 let currentOpacity = 0.7; 
 
 // --- Date Utilities ---
-/**
- * Generates a list of Tuesday dates (the day USDM updates) 
- * from a start date to the current available data date.
- */
 function generateWeeklyTuesdays(startDate, endDate) {
   const dates = [];
   let current = new Date(startDate);
@@ -37,9 +32,6 @@ function isDST(date = new Date()) {
   return date.getTimezoneOffset() < stdTimezoneOffset;
 }
 
-/**
- * Calculates the most recent Thursday release of the Tuesday data.
- */
 function getLatestAvailableDate() {
   const now = new Date();
   const isDst = isDST(now);
@@ -92,15 +84,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const geojsonLayerGroup = L.layerGroup().addTo(map);
 
-// --- Opacity Control (The Map Slider) ---
+// --- Opacity Control ---
 const OpacitySlider = L.Control.extend({
   onAdd: function(map) {
     const container = L.DomUtil.create('div', 'opacity-control-container');
-    
-    // Stop map interactions (dragging/clicking) when touching the slider
     L.DomEvent.disableClickPropagation(container);
     L.DomEvent.disableScrollPropagation(container);
-
     container.innerHTML = `
       <label for="opacity-slider">Map Opacity</label>
       <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="${currentOpacity}">
@@ -109,15 +98,11 @@ const OpacitySlider = L.Control.extend({
   }
 });
 
-// Add the control to the top right of the map
 map.addControl(new OpacitySlider({ position: 'topright' }));
 
-// Global Event Listener for Opacity Changes
 document.addEventListener('input', function (e) {
   if (e.target && e.target.id === 'opacity-slider') {
     currentOpacity = parseFloat(e.target.value);
-    
-    // Iterate through current map layers and update their style immediately
     geojsonLayerGroup.eachLayer(layer => {
       if (layer.setStyle) {
         layer.setStyle({ fillOpacity: currentOpacity });
@@ -126,9 +111,6 @@ document.addEventListener('input', function (e) {
   }
 });
 
-/**
- * Fetches and displays GeoJSON data for a specific date.
- */
 function loadDroughtGeoJSON(date) {
   const dateForUrl = date.replace(/-/g, '');
   const url = `https://droughtmonitor.unl.edu/data/json/usdm_${dateForUrl}.json`;
@@ -136,7 +118,6 @@ function loadDroughtGeoJSON(date) {
   const yyyy = dateObj.getUTCFullYear();
   const month = dateObj.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
   const dd = String(dateObj.getUTCDate()).padStart(2, '0');
-  
   document.getElementById('date-display').innerText = `${yyyy} ${month} ${dd}`;
 
   fetch(url)
@@ -148,20 +129,41 @@ function loadDroughtGeoJSON(date) {
           fillColor: getColor(feature.properties.DM),
           weight: 1,
           color: 'black',
-          fillOpacity: currentOpacity, // Respects the current slider state
+          fillOpacity: currentOpacity,
         }),
         onEachFeature: (feature, layer) => {
           const dm = feature.properties.DM;
           const code = 'D' + dm;
           const desc = getDroughtCategoryText(dm);
           layer.bindPopup(`<strong>${code}</strong> (${desc})`);
+
+          // Hover listeners restored
+          layer.on({
+            mouseover: (e) => {
+              const l = e.target;
+              l.setStyle({
+                weight: 3,
+                color: '#666',
+                fillOpacity: Math.min(currentOpacity + 0.2, 1)
+              });
+              l.bringToFront();
+            },
+            mouseout: (e) => {
+              const l = e.target;
+              l.setStyle({
+                weight: 1,
+                color: 'black',
+                fillOpacity: currentOpacity
+              });
+            }
+          });
         }
       }).addTo(geojsonLayerGroup);
     })
     .catch(err => console.error("Data load error:", err));
 }
 
-// --- Time Slider Controls Setup ---
+// --- Controls Setup ---
 const startDate = new Date(Date.UTC(2000, 0, 4));
 const latestAvailableDateStr = getLatestAvailableDate();
 const droughtDates = generateWeeklyTuesdays(startDate, new Date(latestAvailableDateStr + 'T00:00:00Z'));
@@ -214,7 +216,7 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
-// --- Dropdown Date Picker Logic ---
+// --- Date Picker Logic ---
 const rightPlaceholder = document.getElementById('right-placeholder');
 rightPlaceholder.innerHTML = `
   <label>Jump to Date:</label>
@@ -282,7 +284,7 @@ daySelect.addEventListener('change', () => {
   updateSliderForDate(daySelect.value);
 });
 
-// --- Initialization ---
+// --- Init ---
 function createLegend() {
   const legendEl = document.getElementById('legend');
   const categories = [
