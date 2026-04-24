@@ -1,3 +1,6 @@
+// --- Global State & Config ---
+let currentOpacity = 0.7; // Default starting opacity
+
 // --- Date Utilities ---
 function generateWeeklyTuesdays(startDate, endDate) {
   const dates = [];
@@ -73,12 +76,45 @@ function getDroughtCategoryText(dm) {
   }
 }
 
+// Map Initialization
 const map = L.map('map').setView([39.5, -98.5], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors',
 }).addTo(map);
 
 const geojsonLayerGroup = L.layerGroup().addTo(map);
+
+// --- Opacity Control ---
+const OpacitySlider = L.Control.extend({
+  onAdd: function(map) {
+    const container = L.DomUtil.create('div', 'opacity-control-container');
+    
+    // Prevent map interactions when using the slider
+    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.disableScrollPropagation(container);
+
+    container.innerHTML = `
+      <label for="opacity-slider">Map Opacity</label>
+      <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="${currentOpacity}">
+    `;
+    return container;
+  }
+});
+
+map.addControl(new OpacitySlider({ position: 'topright' }));
+
+// Listen for slider changes
+document.addEventListener('input', function (e) {
+  if (e.target && e.target.id === 'opacity-slider') {
+    currentOpacity = parseFloat(e.target.value);
+    // Update existing layers immediately
+    geojsonLayerGroup.eachLayer(layer => {
+      if (layer.setStyle) {
+        layer.setStyle({ fillOpacity: currentOpacity });
+      }
+    });
+  }
+});
 
 function loadDroughtGeoJSON(date) {
   const dateForUrl = date.replace(/-/g, '');
@@ -98,7 +134,7 @@ function loadDroughtGeoJSON(date) {
           fillColor: getColor(feature.properties.DM),
           weight: 1,
           color: 'black',
-          fillOpacity: 0.7,
+          fillOpacity: currentOpacity, // Uses current slider value
         }),
         onEachFeature: (feature, layer) => {
           const dm = feature.properties.DM;
@@ -150,7 +186,6 @@ slider.addEventListener('input', debouncedLoad);
 prevBtn.addEventListener('click', () => {
   let currentValue = parseInt(slider.value);
   let maxValue = parseInt(slider.max);
-  
   if (currentValue < maxValue) {
     slider.value = currentValue + 1;
     debouncedLoad(); 
@@ -159,7 +194,6 @@ prevBtn.addEventListener('click', () => {
 
 nextBtn.addEventListener('click', () => {
   let currentValue = parseInt(slider.value);
-  
   if (currentValue > 0) {
     slider.value = currentValue - 1;
     debouncedLoad();
