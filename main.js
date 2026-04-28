@@ -227,9 +227,11 @@ nextBtn.addEventListener('click', () => {
 const rightPlaceholder = document.getElementById('right-placeholder');
 rightPlaceholder.innerHTML = `
   <label>Jump to Date:</label>
-  <select id="year-select"></select>
-  <select id="month-select"></select>
-  <select id="day-select"></select>
+  <div id="date-picker-selects">
+    <select id="year-select"></select>
+    <select id="month-select"></select>
+    <select id="day-select"></select>
+  </div>
 `;
 
 const yearSelect = document.getElementById('year-select');

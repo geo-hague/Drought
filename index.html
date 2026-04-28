@@ -18,7 +18,7 @@
       color: #333;
     }
 
-    /* ── App shell: title / map / panel stacked ─────────────── */
+    /* ── App shell ──────────────────────────────────────────── */
     #app {
       display: flex;
       flex-direction: column;
@@ -44,11 +44,6 @@
       white-space: nowrap;
     }
 
-    #title-bar h1::before {
-      content: '🌵';
-      margin-right: 6px;
-    }
-
     #title-subtitle {
       font-size: 0.78rem;
       opacity: 0.75;
@@ -63,14 +58,13 @@
       min-height: 0;
     }
 
-    /* ── Bottom panel ───────────────────────────────────────── */
+    /* ── Bottom panel: two columns — legend | controls ──────── */
     #bottom-panel {
       flex: 0 0 auto;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 12px;
       padding: 10px 16px;
       background: #fff;
       border-top: 1px solid #ddd;
@@ -103,19 +97,22 @@
       flex-shrink: 0;
     }
 
-    /* ── Slider container ───────────────────────────────────── */
+    /* ── Slider container (grows to fill remaining space) ────── */
+    /*    Also now contains the Jump-to-Date picker              */
     #slider-container {
-      flex: 1 1 260px;
+      flex: 1 1 220px;
       min-width: 0;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
 
     .slider-controls {
       display: flex;
       align-items: center;
-      justify-content: center;
+      width: 100%;
       gap: 10px;
-      margin: 8px 0;
     }
 
     .step-btn {
@@ -136,7 +133,7 @@
     .step-btn:active  { background-color: #154360; }
     .step-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-    /* ── Range slider — explicit track & thumb for all engines ── */
+    /* ── Range slider ────────────────────────────────────────── */
     #slider {
       flex: 1;
       -webkit-appearance: none;
@@ -148,7 +145,6 @@
       height: 24px;
     }
 
-    /* WebKit / Blink (Chrome, Safari, Edge, most mobile) */
     #slider::-webkit-slider-runnable-track {
       height: 6px;
       background: #ddd;
@@ -167,7 +163,6 @@
       box-shadow: 0 0 3px rgba(0,0,0,0.4);
     }
 
-    /* Firefox */
     #slider::-moz-range-track {
       height: 6px;
       background: #ddd;
@@ -186,32 +181,30 @@
     #date-display {
       font-size: 1rem;
       color: #1a5276;
-      margin-top: 2px;
     }
 
     #date-range {
       font-size: 0.8rem;
       color: #666;
-      margin-top: 2px;
     }
 
     #slider-labels {
       display: flex;
       justify-content: space-between;
+      width: 100%;
       font-size: 0.8rem;
       color: #555;
-      margin-top: 3px;
     }
 
-    /* ── Date-picker (right panel) ──────────────────────────── */
+    /* ── Jump-to-Date (now inside slider-container) ─────────── */
     #right-placeholder {
-      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
+      gap: 4px;
       font-size: 13px;
       color: #2c3e50;
-      gap: 6px;
-      width: 140px;
+      width: 100%;        /* fills slider-container width */
+      align-items: center;
     }
 
     #right-placeholder label {
@@ -219,10 +212,19 @@
       margin: 0;
     }
 
-    #right-placeholder select {
+    /* Selects sit in a row — they're short enough to share a line */
+    #date-picker-selects {
+      display: flex;
+      gap: 6px;
       width: 100%;
-      padding: 6px 8px;
-      font-size: 0.95rem;
+      justify-content: center;
+    }
+
+    #right-placeholder select {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 6px 4px;
+      font-size: 0.9rem;
       border-radius: 4px;
       border: 1px solid #ccc;
       min-height: 36px;
@@ -230,13 +232,13 @@
 
     /* ── Opacity control (map overlay widget) ───────────────── */
     .opacity-control-container {
-      background: rgba(255,255,255,0.88);
+      background: rgba(255, 255, 255, 0.3);
       padding: 8px 10px;
       border-radius: 6px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.35);
-      border: 1px solid rgba(0,0,0,0.15);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      border: 2px solid rgba(0,0,0,0.2);
       width: 110px;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(5px);
     }
 
     .opacity-control-container label {
@@ -262,6 +264,7 @@
         max-height: 55vh;
       }
 
+      /* Compact horizontal legend on mobile */
       #legend {
         display: flex;
         flex-wrap: wrap;
@@ -272,13 +275,6 @@
         border: 1px solid #ddd;
       }
       .legend-item { margin-bottom: 0; }
-
-      #slider-container { width: 100%; }
-
-      /* Date-picker fills the row, stays column */
-      #right-placeholder {
-        width: 100%;
-      }
 
       #date-range { font-size: 0.75rem; }
     }
@@ -309,9 +305,10 @@
           <span id="slider-label-left"></span>
           <span id="slider-label-right"></span>
         </div>
-      </div>
 
-      <div id="right-placeholder"></div>
+        <!-- Jump-to-Date lives here now — always below the slider -->
+        <div id="right-placeholder"></div>
+      </div>
     </div>
 
   </div>
