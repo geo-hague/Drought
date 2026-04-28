@@ -16,6 +16,7 @@
       font-family: Arial, sans-serif;
       background: #f9f9f9;
       color: #333;
+      overflow-x: hidden; /* prevent horizontal scroll at any width */
     }
 
     /* ── App shell ──────────────────────────────────────────── */
@@ -101,8 +102,12 @@
 
     /* ── Slider container ───────────────────────────────────── */
     #slider-container {
-      flex: 1 1 200px;   /* grows to fill; stays left of date picker on wide screens */
-      min-width: 0;
+      flex: 1 1 260px;
+      /* A real min-width here is the key: when legend + slider-min + date-picker
+         would exceed the container, the flex algorithm wraps the date picker to
+         the next row. With min-width:0 it just shrinks and everyone stays on one
+         line, causing the date picker to overflow off-screen to the right. */
+      min-width: 260px;
       text-align: center;
     }
 
@@ -194,7 +199,7 @@
 
     /* ── Date picker — third column, wraps below when needed ── */
     #right-placeholder {
-      flex: 0 0 auto;          /* don't grow or shrink; wrap to next row instead */
+      flex: 0 0 160px;         /* fixed width; wraps to next row when no room */
       display: flex;
       flex-direction: column;
       font-size: 13px;
