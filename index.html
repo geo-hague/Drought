@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
+    /* ── Reset & base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -13,85 +16,99 @@
       font-family: Arial, sans-serif;
       background-color: #f9f9f9;
       color: #333;
-      overflow: hidden;
     }
 
-    #map {
-      height: calc(100vh - 160px);
-      width: 100%;
-    }
-
-    #bottom-panel {
+    /* ── App shell ──────────────────────────────────────────── */
+    #app {
       display: flex;
+      flex-direction: column;
+      height: 100dvh;   /* dvh handles mobile browser chrome */
+    }
+
+    /* ── Map ────────────────────────────────────────────────── */
+    #map {
+      flex: 1 1 auto;   /* fills whatever space remains above the panel */
+      min-height: 0;    /* lets flex shrink correctly in older engines  */
+    }
+
+    /* ── Bottom panel ───────────────────────────────────────── */
+    #bottom-panel {
+      flex: 0 0 auto;   /* sized by content, never shrinks the map away */
+      display: flex;
+      flex-wrap: wrap;          /* allow wrapping on narrow screens */
       align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
-      height: 160px;
-      box-sizing: border-box;
-      background-color: #fff;
+      gap: 10px;
+      padding: 10px 16px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      overflow-y: auto;         /* scroll if panel content is too tall   */
+      max-height: 50vh;         /* cap height on very small screens      */
     }
 
+    /* ── Legend ─────────────────────────────────────────────── */
     #legend {
-      flex: 0 0 190px;
+      flex: 0 0 auto;
       background: white;
-      padding: 10px 15px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      padding: 8px 12px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.25);
       border-radius: 5px;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .legend-color-box {
-      width: 20px;
-      height: 20px;
-      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
       border: 1px solid #999;
-      box-sizing: border-box;
+      flex-shrink: 0;
     }
 
+    /* ── Slider container ───────────────────────────────────── */
     #slider-container {
-      flex: 1;
+      flex: 1 1 260px;          /* grow to fill, but wrap if narrow      */
+      min-width: 200px;
       text-align: center;
-      max-width: 1400px;
-      margin: 0 20px;
     }
 
     #slider-container label {
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #2c3e50;
     }
 
-    /* Slider Row Styling */
     .slider-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 15px;
-      margin: 10px 0;
+      gap: 10px;
+      margin: 8px 0;
     }
 
     .step-btn {
       background-color: #337ab7;
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 8px 16px;
+      border-radius: 6px;
+      /* Generous touch target — at least 44 × 44 px */
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0 14px;
       cursor: pointer;
       font-size: 18px;
-      transition: background 0.2s;
       line-height: 1;
+      transition: background 0.2s;
+      flex-shrink: 0;
     }
 
-    .step-btn:hover {
-      background-color: #1a5276;
-    }
-
+    .step-btn:hover  { background-color: #1a5276; }
+    .step-btn:active { background-color: #154360; }
     .step-btn:disabled {
       background-color: #ccc;
       cursor: not-allowed;
@@ -106,108 +123,163 @@
       -webkit-appearance: none;
       appearance: none;
       direction: rtl;
+      /* taller hit-area via padding trick keeps visual thin */
+      padding: 10px 0;
+      background-clip: content-box;
     }
 
     #slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       background: #337ab7;
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid #fff;
-      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 3px rgba(0,0,0,0.4);
     }
 
     #date-display {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: #1a5276;
-      margin-top: 5px;
+      margin-top: 2px;
     }
 
     #date-range {
-      font-size: 0.85rem;
-      color: #444;
-      margin-top: 3px;
-    }
-
-    #right-placeholder {
-      flex: 0 0 220px;
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-      color: #2c3e50;
-      gap: 10px;
-    }
-
-    #right-placeholder select {
-      width: 100%;
-      padding: 4px 6px;
-      font-size: 1rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 2px;
     }
 
     #slider-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: #555;
-      margin-top: 5px;
-      padding: 0 2px;
+      margin-top: 3px;
     }
 
+    /* ── Date-picker (right panel) ──────────────────────────── */
+    #right-placeholder {
+      flex: 0 1 auto;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      color: #2c3e50;
+      gap: 6px;
+      min-width: 140px;
+    }
+
+    #right-placeholder label {
+      font-weight: bold;
+    }
+
+    #right-placeholder select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      /* Taller touch target */
+      min-height: 36px;
+    }
+
+    /* ── Opacity control (map overlay) ─────────────────────── */
     .opacity-control-container {
-      /* Use RGBA: Red, Green, Blue, Alpha (0.0 to 1.0) */
-      background: rgba(255, 255, 255, 0.3); 
-
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-      border: 2px solid rgba(0,0,0,0.2);
-      width: 100px;
-    
-      /* Optional: Adds a blur effect to the background (Glassmorphism) */
-      backdrop-filter: blur(5px);
+      background: rgba(255,255,255,0.88);
+      padding: 8px 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.35);
+      border: 1px solid rgba(0,0,0,0.15);
+      width: 110px;
+      backdrop-filter: blur(4px);
     }
-    
+
     .opacity-control-container label {
       display: block;
       font-weight: bold;
       font-size: 12px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       color: #333;
     }
-    
-    #opacity-slider {
-      width: 100%;
-      cursor: pointer;
+
+    #opacity-slider { width: 100%; cursor: pointer; }
+
+    /* ── Mobile tweaks (≤ 600 px) ───────────────────────────── */
+    @media (max-width: 600px) {
+      #bottom-panel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 10px 12px;
+        max-height: 55vh;
+      }
+
+      /* Stack legend items horizontally to save vertical space */
+      #legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        padding: 8px;
+        font-size: 12px;
+      }
+
+      .legend-item { margin-bottom: 0; }
+
+      /* Slider takes full width */
+      #slider-container {
+        width: 100%;
+        min-width: 0;
+      }
+
+      /* Date-picker spans full width in a horizontal row */
+      #right-placeholder {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        width: 100%;
+      }
+
+      #right-placeholder label { width: 100%; margin-bottom: 0; }
+
+      #right-placeholder select {
+        flex: 1 1 60px;
+        min-width: 60px;
+      }
+
+      /* Smaller date-range text to reduce clutter */
+      #date-range { font-size: 0.75rem; }
     }
   </style>
 </head>
 <body>
-  <div id="map"></div>
+  <!-- Single flex column that fills the viewport -->
+  <div id="app">
+    <div id="map"></div>
 
-  <div id="bottom-panel">
-    <div id="legend"></div>
+    <div id="bottom-panel">
+      <div id="legend"></div>
 
-    <div id="slider-container">
-      <label for="slider">Select Date:</label>
-      <div class="slider-controls">
-        <button id="prev-week" class="step-btn" title="Previous Week">◀</button>
-        <input type="range" id="slider" min="0" max="0" value="0" />
-        <button id="next-week" class="step-btn" title="Next Week">▶</button>
+      <div id="slider-container">
+        <label for="slider">Select Date:</label>
+        <div class="slider-controls">
+          <button id="prev-week" class="step-btn" title="Previous Week">◀</button>
+          <input type="range" id="slider" min="0" max="0" value="0" />
+          <button id="next-week" class="step-btn" title="Next Week">▶</button>
+        </div>
+        <div id="date-display"></div>
+        <div id="date-range"></div>
+        <div id="slider-labels">
+          <span id="slider-label-left"></span>
+          <span id="slider-label-right"></span>
+        </div>
       </div>
-      <div id="date-display"></div>
-      <div id="date-range"></div>
-      <div id="slider-labels">
-        <span id="slider-label-left"></span>
-        <span id="slider-label-right"></span>
-      </div>
+
+      <div id="right-placeholder"></div>
     </div>
-
-    <div id="right-placeholder"></div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
