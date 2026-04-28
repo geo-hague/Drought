@@ -14,36 +14,68 @@
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
+      background: #f9f9f9;
       color: #333;
     }
 
-    /* ── App shell ──────────────────────────────────────────── */
+    /* ── App shell: title / map / panel stacked ─────────────── */
     #app {
       display: flex;
       flex-direction: column;
-      height: 100dvh;   /* dvh handles mobile browser chrome */
+      height: 100dvh;
+    }
+
+    /* ── Title bar ──────────────────────────────────────────── */
+    #title-bar {
+      flex: 0 0 auto;
+      background: #2c3e50;
+      color: #fff;
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #title-bar h1 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    #title-bar h1::before {
+      content: '🌵';
+      margin-right: 6px;
+    }
+
+    #title-subtitle {
+      font-size: 0.78rem;
+      opacity: 0.75;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ── Map ────────────────────────────────────────────────── */
     #map {
-      flex: 1 1 auto;   /* fills whatever space remains above the panel */
-      min-height: 0;    /* lets flex shrink correctly in older engines  */
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     /* ── Bottom panel ───────────────────────────────────────── */
     #bottom-panel {
-      flex: 0 0 auto;   /* sized by content, never shrinks the map away */
+      flex: 0 0 auto;
       display: flex;
-      flex-wrap: wrap;          /* allow wrapping on narrow screens */
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       padding: 10px 16px;
       background: #fff;
       border-top: 1px solid #ddd;
-      overflow-y: auto;         /* scroll if panel content is too tall   */
-      max-height: 50vh;         /* cap height on very small screens      */
+      overflow-y: auto;
+      max-height: 50vh;
     }
 
     /* ── Legend ─────────────────────────────────────────────── */
@@ -61,6 +93,7 @@
       align-items: center;
       margin-bottom: 4px;
     }
+    .legend-item:last-child { margin-bottom: 0; }
 
     .legend-color-box {
       width: 18px;
@@ -72,15 +105,9 @@
 
     /* ── Slider container ───────────────────────────────────── */
     #slider-container {
-      flex: 1 1 260px;          /* grow to fill, but wrap if narrow      */
-      min-width: 200px;
+      flex: 1 1 260px;
+      min-width: 0;
       text-align: center;
-    }
-
-    #slider-container label {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #2c3e50;
     }
 
     .slider-controls {
@@ -96,7 +123,6 @@
       color: white;
       border: none;
       border-radius: 6px;
-      /* Generous touch target — at least 44 × 44 px */
       min-width: 44px;
       min-height: 44px;
       padding: 0 14px;
@@ -106,31 +132,48 @@
       transition: background 0.2s;
       flex-shrink: 0;
     }
+    .step-btn:hover   { background-color: #1a5276; }
+    .step-btn:active  { background-color: #154360; }
+    .step-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-    .step-btn:hover  { background-color: #1a5276; }
-    .step-btn:active { background-color: #154360; }
-    .step-btn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
+    /* ── Range slider — explicit track & thumb for all engines ── */
     #slider {
       flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+      direction: rtl;
+      cursor: pointer;
+      height: 24px;
+    }
+
+    /* WebKit / Blink (Chrome, Safari, Edge, most mobile) */
+    #slider::-webkit-slider-runnable-track {
       height: 6px;
       background: #ddd;
       border-radius: 3px;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      direction: rtl;
-      /* taller hit-area via padding trick keeps visual thin */
-      padding: 10px 0;
-      background-clip: content-box;
     }
-
     #slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
+      width: 24px;
+      height: 24px;
+      margin-top: -9px;
+      background: #337ab7;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 0 3px rgba(0,0,0,0.4);
+    }
+
+    /* Firefox */
+    #slider::-moz-range-track {
+      height: 6px;
+      background: #ddd;
+      border-radius: 3px;
+    }
+    #slider::-moz-range-thumb {
       width: 24px;
       height: 24px;
       background: #337ab7;
@@ -162,17 +205,18 @@
 
     /* ── Date-picker (right panel) ──────────────────────────── */
     #right-placeholder {
-      flex: 0 1 auto;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       font-size: 13px;
       color: #2c3e50;
       gap: 6px;
-      min-width: 140px;
+      width: 140px;
     }
 
     #right-placeholder label {
       font-weight: bold;
+      margin: 0;
     }
 
     #right-placeholder select {
@@ -181,11 +225,10 @@
       font-size: 0.95rem;
       border-radius: 4px;
       border: 1px solid #ccc;
-      /* Taller touch target */
       min-height: 36px;
     }
 
-    /* ── Opacity control (map overlay) ─────────────────────── */
+    /* ── Opacity control (map overlay widget) ───────────────── */
     .opacity-control-container {
       background: rgba(255,255,255,0.88);
       padding: 8px 10px;
@@ -206,65 +249,55 @@
 
     #opacity-slider { width: 100%; cursor: pointer; }
 
-    /* ── Mobile tweaks (≤ 600 px) ───────────────────────────── */
+    /* ── Mobile (≤ 600 px) ──────────────────────────────────── */
     @media (max-width: 600px) {
+      #title-bar h1   { font-size: 0.9rem; }
+      #title-subtitle { display: none; }
+
       #bottom-panel {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 10px;
         padding: 10px 12px;
         max-height: 55vh;
       }
 
-      /* Stack legend items horizontally to save vertical space */
       #legend {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px 12px;
+        gap: 4px 12px;
         padding: 8px;
         font-size: 12px;
+        box-shadow: none;
+        border: 1px solid #ddd;
       }
-
       .legend-item { margin-bottom: 0; }
 
-      /* Slider takes full width */
-      #slider-container {
-        width: 100%;
-        min-width: 0;
-      }
+      #slider-container { width: 100%; }
 
-      /* Date-picker spans full width in a horizontal row */
+      /* Date-picker fills the row, stays column */
       #right-placeholder {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 6px;
-        min-width: 0;
         width: 100%;
       }
 
-      #right-placeholder label { width: 100%; margin-bottom: 0; }
-
-      #right-placeholder select {
-        flex: 1 1 60px;
-        min-width: 60px;
-      }
-
-      /* Smaller date-range text to reduce clutter */
       #date-range { font-size: 0.75rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Single flex column that fills the viewport -->
   <div id="app">
+
+    <div id="title-bar">
+      <h1>U.S. Drought Monitor</h1>
+      <span id="title-subtitle">Weekly data from the National Drought Mitigation Center</span>
+    </div>
+
     <div id="map"></div>
 
     <div id="bottom-panel">
       <div id="legend"></div>
 
       <div id="slider-container">
-        <label for="slider">Select Date:</label>
         <div class="slider-controls">
           <button id="prev-week" class="step-btn" title="Previous Week">◀</button>
           <input type="range" id="slider" min="0" max="0" value="0" />
@@ -280,6 +313,7 @@
 
       <div id="right-placeholder"></div>
     </div>
+
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
