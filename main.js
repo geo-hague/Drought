@@ -226,12 +226,10 @@ nextBtn.addEventListener('click', () => {
 // --- Date Picker Logic ---
 const rightPlaceholder = document.getElementById('right-placeholder');
 rightPlaceholder.innerHTML = `
-  <label>Jump to Date:</label>
-  <div id="date-picker-selects">
-    <select id="year-select"></select>
-    <select id="month-select"></select>
-    <select id="day-select"></select>
-  </div>
+  <label>Select date or use slider:</label>
+  <select id="year-select"></select>
+  <select id="month-select"></select>
+  <select id="day-select"></select>
 `;
 
 const yearSelect = document.getElementById('year-select');

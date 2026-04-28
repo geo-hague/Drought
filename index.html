@@ -58,13 +58,15 @@
       min-height: 0;
     }
 
-    /* ── Bottom panel: two columns — legend | controls ──────── */
+    /* ── Bottom panel ───────────────────────────────────────── */
+    /*    flex-wrap means the date picker falls to a new row    */
+    /*    automatically when there isn't enough horizontal room  */
     #bottom-panel {
       flex: 0 0 auto;
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 12px;
+      align-items: center;
+      gap: 10px;
       padding: 10px 16px;
       background: #fff;
       border-top: 1px solid #ddd;
@@ -97,22 +99,18 @@
       flex-shrink: 0;
     }
 
-    /* ── Slider container (grows to fill remaining space) ────── */
-    /*    Also now contains the Jump-to-Date picker              */
+    /* ── Slider container ───────────────────────────────────── */
     #slider-container {
-      flex: 1 1 220px;
+      flex: 1 1 200px;   /* grows to fill; stays left of date picker on wide screens */
       min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+      text-align: center;
     }
 
     .slider-controls {
       display: flex;
       align-items: center;
-      width: 100%;
       gap: 10px;
+      margin: 6px 0;
     }
 
     .step-btn {
@@ -144,7 +142,6 @@
       cursor: pointer;
       height: 24px;
     }
-
     #slider::-webkit-slider-runnable-track {
       height: 6px;
       background: #ddd;
@@ -162,7 +159,6 @@
       border: 2px solid #fff;
       box-shadow: 0 0 3px rgba(0,0,0,0.4);
     }
-
     #slider::-moz-range-track {
       height: 6px;
       background: #ddd;
@@ -181,30 +177,29 @@
     #date-display {
       font-size: 1rem;
       color: #1a5276;
+      margin-top: 2px;
     }
-
     #date-range {
       font-size: 0.8rem;
       color: #666;
+      margin-top: 2px;
     }
-
     #slider-labels {
       display: flex;
       justify-content: space-between;
-      width: 100%;
       font-size: 0.8rem;
       color: #555;
+      margin-top: 3px;
     }
 
-    /* ── Jump-to-Date (now inside slider-container) ─────────── */
+    /* ── Date picker — third column, wraps below when needed ── */
     #right-placeholder {
+      flex: 0 0 auto;          /* don't grow or shrink; wrap to next row instead */
       display: flex;
       flex-direction: column;
-      gap: 4px;
       font-size: 13px;
       color: #2c3e50;
-      width: 100%;        /* fills slider-container width */
-      align-items: center;
+      gap: 6px;
     }
 
     #right-placeholder label {
@@ -212,19 +207,10 @@
       margin: 0;
     }
 
-    /* Selects sit in a row — they're short enough to share a line */
-    #date-picker-selects {
-      display: flex;
-      gap: 6px;
-      width: 100%;
-      justify-content: center;
-    }
-
     #right-placeholder select {
-      flex: 1 1 0;
-      min-width: 0;
-      padding: 6px 4px;
-      font-size: 0.9rem;
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 0.95rem;
       border-radius: 4px;
       border: 1px solid #ccc;
       min-height: 36px;
@@ -233,11 +219,11 @@
     /* ── Opacity control (map overlay widget) ───────────────── */
     .opacity-control-container {
       background: rgba(255, 255, 255, 0.3);
-      padding: 8px 10px;
-      border-radius: 6px;
+      padding: 10px;
+      border-radius: 5px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.4);
       border: 2px solid rgba(0,0,0,0.2);
-      width: 110px;
+      width: 100px;
       backdrop-filter: blur(5px);
     }
 
@@ -245,7 +231,7 @@
       display: block;
       font-weight: bold;
       font-size: 12px;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       color: #333;
     }
 
@@ -264,7 +250,7 @@
         max-height: 55vh;
       }
 
-      /* Compact horizontal legend on mobile */
+      /* Compact horizontal legend */
       #legend {
         display: flex;
         flex-wrap: wrap;
@@ -275,6 +261,10 @@
         border: 1px solid #ddd;
       }
       .legend-item { margin-bottom: 0; }
+
+      #slider-container { width: 100%; }
+
+      #right-placeholder { width: 100%; }
 
       #date-range { font-size: 0.75rem; }
     }
@@ -305,10 +295,9 @@
           <span id="slider-label-left"></span>
           <span id="slider-label-right"></span>
         </div>
-
-        <!-- Jump-to-Date lives here now — always below the slider -->
-        <div id="right-placeholder"></div>
       </div>
+
+      <div id="right-placeholder"></div>
     </div>
 
   </div>
