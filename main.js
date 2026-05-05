@@ -120,6 +120,9 @@ function loadDroughtGeoJSON(date) {
   const dd = String(dateObj.getUTCDate()).padStart(2, '0');
   document.getElementById('date-display').innerText = `${yyyy} ${month} ${dd}`;
 
+  const spinner = document.getElementById('map-spinner');
+  spinner.classList.add('active');
+
   fetch(url)
     .then(response => response.json())
     .then(data => {
@@ -166,8 +169,12 @@ function loadDroughtGeoJSON(date) {
           });
         }
       }).addTo(geojsonLayerGroup);
+      spinner.classList.remove('active');
     })
-    .catch(err => console.error("Data load error:", err));
+    .catch(err => {
+      console.error("Data load error:", err);
+      spinner.classList.remove('active');
+    });
 }
 
 // --- Controls Setup ---
