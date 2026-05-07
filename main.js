@@ -298,7 +298,69 @@ daySelect.addEventListener('change', () => {
   updateSliderForDate(daySelect.value);
 });
 
-// --- Init ---
+// --- Slider date tooltip ---
+const sliderTooltip = document.createElement('div');
+sliderTooltip.id = 'slider-tooltip';
+Object.assign(sliderTooltip.style, {
+  position: 'fixed',
+  background: '#2c3e50',
+  color: '#fff',
+  padding: '4px 10px',
+  borderRadius: '4px',
+  fontSize: '0.85rem',
+  pointerEvents: 'none',
+  whiteSpace: 'nowrap',
+  opacity: '0',
+  transition: 'opacity 0.15s ease',
+  zIndex: '9999',
+  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+});
+document.body.appendChild(sliderTooltip);
+
+let tooltipTimeout = null;
+
+function getSliderTooltipDate() {
+  const reversedIndex = droughtDates.length - 1 - parseInt(slider.value);
+  return droughtDates[reversedIndex];
+}
+
+function positionTooltip(e) {
+  // Calculate thumb position as a fraction along the slider
+  const rect = slider.getBoundingClientRect();
+  const val = parseInt(slider.value);
+  const max = parseInt(slider.max);
+  // slider direction is rtl so fraction is inverted
+  const fraction = 1 - (val / max);
+  const thumbX = rect.left + fraction * rect.width;
+  sliderTooltip.style.left = `${thumbX - sliderTooltip.offsetWidth / 2}px`;
+  sliderTooltip.style.top = `${rect.top - sliderTooltip.offsetHeight - 10}px`;
+}
+
+slider.addEventListener('mouseenter', (e) => {
+  tooltipTimeout = setTimeout(() => {
+    sliderTooltip.textContent = getSliderTooltipDate();
+    sliderTooltip.style.opacity = '1';
+    positionTooltip(e);
+  }, 500);
+});
+
+slider.addEventListener('mousemove', (e) => {
+  if (sliderTooltip.style.opacity === '1') {
+    positionTooltip(e);
+  }
+});
+
+slider.addEventListener('mouseleave', () => {
+  clearTimeout(tooltipTimeout);
+  sliderTooltip.style.opacity = '0';
+});
+
+// Keep tooltip text current while dragging
+slider.addEventListener('input', () => {
+  if (sliderTooltip.style.opacity === '1') {
+    sliderTooltip.textContent = getSliderTooltipDate();
+  }
+});
 function createLegend() {
   const legendEl = document.getElementById('legend');
   const categories = [
