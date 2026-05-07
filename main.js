@@ -324,28 +324,30 @@ function getSliderTooltipDate() {
   return droughtDates[reversedIndex];
 }
 
-function positionTooltip(e) {
-  // Calculate thumb position as a fraction along the slider
+function getDateAtCursor(e) {
   const rect = slider.getBoundingClientRect();
-  const val = parseInt(slider.value);
-  const max = parseInt(slider.max);
-  // slider direction is rtl so fraction is inverted
-  const fraction = 1 - (val / max);
-  const thumbX = rect.left + fraction * rect.width;
-  sliderTooltip.style.left = `${thumbX - sliderTooltip.offsetWidth / 2}px`;
-  sliderTooltip.style.top = `${rect.top - sliderTooltip.offsetHeight - 10}px`;
+  // Clamp cursor fraction to [0,1]; slider is rtl so invert
+  const fraction = 1 - Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+  const index = Math.round(fraction * (droughtDates.length - 1));
+  return droughtDates[index];
+}
+
+function positionTooltip(e) {
+  sliderTooltip.style.left = `${e.clientX - sliderTooltip.offsetWidth / 2}px`;
+  sliderTooltip.style.top = `${slider.getBoundingClientRect().top - sliderTooltip.offsetHeight - 10}px`;
 }
 
 slider.addEventListener('mouseenter', (e) => {
   tooltipTimeout = setTimeout(() => {
-    sliderTooltip.textContent = getSliderTooltipDate();
-    sliderTooltip.style.opacity = '1';
+    sliderTooltip.textContent = getDateAtCursor(e);
     positionTooltip(e);
+    sliderTooltip.style.opacity = '1';
   }, 500);
 });
 
 slider.addEventListener('mousemove', (e) => {
   if (sliderTooltip.style.opacity === '1') {
+    sliderTooltip.textContent = getDateAtCursor(e);
     positionTooltip(e);
   }
 });
