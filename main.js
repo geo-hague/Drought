@@ -324,31 +324,37 @@ function getSliderTooltipDate() {
   return droughtDates[reversedIndex];
 }
 
-function getDateAtCursor(e) {
+function getDateAtCursor(clientX) {
   const rect = slider.getBoundingClientRect();
-  // Clamp cursor fraction to [0,1]; slider is rtl so invert
-  const fraction = 1 - Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+  // slider is direction:rtl — left edge = oldest, right edge = newest
+  // fraction from left: 0 = left (oldest) → droughtDates[0], 1 = right (newest) → droughtDates[last]
+  const fraction = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
   const index = Math.round(fraction * (droughtDates.length - 1));
   return droughtDates[index];
 }
 
-function positionTooltip(e) {
-  sliderTooltip.style.left = `${e.clientX - sliderTooltip.offsetWidth / 2}px`;
-  sliderTooltip.style.top = `${slider.getBoundingClientRect().top - sliderTooltip.offsetHeight - 10}px`;
+function positionTooltip(clientX) {
+  const rect = slider.getBoundingClientRect();
+  sliderTooltip.style.left = `${clientX - sliderTooltip.offsetWidth / 2}px`;
+  sliderTooltip.style.top  = `${rect.top - sliderTooltip.offsetHeight - 10}px`;
 }
 
+let currentMouseX = 0;
+
 slider.addEventListener('mouseenter', (e) => {
+  currentMouseX = e.clientX;
   tooltipTimeout = setTimeout(() => {
-    sliderTooltip.textContent = getDateAtCursor(e);
-    positionTooltip(e);
+    sliderTooltip.textContent = getDateAtCursor(currentMouseX);
+    positionTooltip(currentMouseX);
     sliderTooltip.style.opacity = '1';
   }, 500);
 });
 
 slider.addEventListener('mousemove', (e) => {
+  currentMouseX = e.clientX;
   if (sliderTooltip.style.opacity === '1') {
-    sliderTooltip.textContent = getDateAtCursor(e);
-    positionTooltip(e);
+    sliderTooltip.textContent = getDateAtCursor(currentMouseX);
+    positionTooltip(currentMouseX);
   }
 });
 
@@ -357,10 +363,10 @@ slider.addEventListener('mouseleave', () => {
   sliderTooltip.style.opacity = '0';
 });
 
-// Keep tooltip text current while dragging
+// While dragging, keep showing cursor-based date
 slider.addEventListener('input', () => {
   if (sliderTooltip.style.opacity === '1') {
-    sliderTooltip.textContent = getSliderTooltipDate();
+    sliderTooltip.textContent = getDateAtCursor(currentMouseX);
   }
 });
 function createLegend() {
