@@ -326,11 +326,12 @@ function getSliderTooltipDate() {
 
 function getDateAtCursor(clientX) {
   const rect = slider.getBoundingClientRect();
-  // slider is direction:rtl — left edge = oldest, right edge = newest
-  // fraction from left: 0 = left (oldest) → droughtDates[0], 1 = right (newest) → droughtDates[last]
   const fraction = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-  const index = Math.round(fraction * (droughtDates.length - 1));
-  return droughtDates[index];
+  // Replicate the slider's own integer snapping: rtl means left=max, right=0
+  const sliderValue = Math.round((1 - fraction) * parseInt(slider.max));
+  // Same lookup the rest of the code uses
+  const reversedIndex = droughtDates.length - 1 - sliderValue;
+  return droughtDates[reversedIndex];
 }
 
 function positionTooltip(clientX) {
