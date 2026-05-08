@@ -326,10 +326,13 @@ function getSliderTooltipDate() {
 
 function getDateAtCursor(clientX) {
   const rect = slider.getBoundingClientRect();
-  const fraction = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-  // Replicate the slider's own integer snapping: rtl means left=max, right=0
+  const thumbRadius = 12; // half of the 24px thumb width in CSS
+  // The browser maps values across the inner track, inset by the thumb radius
+  const trackLeft  = rect.left + thumbRadius;
+  const trackWidth = rect.width - thumbRadius * 2;
+  const fraction = Math.min(Math.max((clientX - trackLeft) / trackWidth, 0), 1);
+  // rtl: left = max (oldest), right = 0 (newest)
   const sliderValue = Math.round((1 - fraction) * parseInt(slider.max));
-  // Same lookup the rest of the code uses
   const reversedIndex = droughtDates.length - 1 - sliderValue;
   return droughtDates[reversedIndex];
 }
